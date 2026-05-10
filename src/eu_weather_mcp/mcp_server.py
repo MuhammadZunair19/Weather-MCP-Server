@@ -103,13 +103,17 @@ class StdioMcpServer:
             raise WeatherMcpError(f"Unknown tool: '{tool_name}'")
 
         return {
-            "content": [{"type": "text", "text": json.dumps(payload, ensure_ascii=True)}],
+            "content": [{"type": "text", "text": _format_pretty_json(payload)}],
             "structuredContent": payload,
             "isError": False,
         }
 
     def _write_message(self, message: dict[str, Any]) -> None:
-        sys.stdout.write(json.dumps(message, ensure_ascii=True) + "\n")
+        if sys.stdout.isatty():
+            output = json.dumps(message, ensure_ascii=True, indent=2)
+        else:
+            output = json.dumps(message, ensure_ascii=True)
+        sys.stdout.write(output + "\n")
         sys.stdout.flush()
 
     def _error_response(self, request_id: Any, code: int, message: str) -> dict[str, Any]:
@@ -145,6 +149,10 @@ def _tool_definitions() -> list[dict[str, Any]]:
             "inputSchema": {"type": "object", "properties": {}},
         },
     ]
+
+
+def _format_pretty_json(payload: dict[str, Any]) -> str:
+    return json.dumps(payload, ensure_ascii=True, indent=2)
 
 
 def main() -> int:

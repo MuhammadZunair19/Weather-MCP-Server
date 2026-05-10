@@ -2,31 +2,23 @@
 
 EU Weather MCP Server is a Python 3.12 project that provides European weather forecasts and alerts using the Open-Meteo API.
 
-It currently includes:
+This project is terminal/MCP based. It does not include a web UI.
 
-- A stdio MCP-style server
-- A local Streamlit UI
-- EU-only location validation
-- City-name lookup with an offline fallback list
-- Docker support
-- `uv`-based dependency management
+It is released as open-source software under the MIT License.
 
 ## What Works Today
-
-The project can do these things right now:
 
 - Get hourly forecasts for a European city or `lat,lon`
 - Get daily forecasts for a European city or `lat,lon`
 - Get active weather alerts for a European city or `lat,lon`
 - Run as a local MCP server over stdio
-- Run as a local Streamlit web app
+- Build and run in Docker
 
 ## Tech Stack
 
 - Python 3.12
 - `uv`
 - `httpx`
-- `streamlit`
 - `pytest`
 - Docker
 
@@ -37,8 +29,9 @@ E:\Weather-MCP-Server
 |-- src\eu_weather_mcp
 |   |-- mcp_server.py
 |   |-- openmeteo.py
+|   |-- location.py
 |   |-- service.py
-|   `-- streamlit_app.py
+|   `-- errors.py
 |-- tests
 |-- Dockerfile
 |-- pyproject.toml
@@ -53,7 +46,7 @@ E:\Weather-MCP-Server
 
 - Python 3.12 installed
 - `uv` installed
-- Docker installed if you want to build containers
+- Docker installed if you want container builds
 
 ### Install runtime dependencies
 
@@ -63,7 +56,7 @@ uv sync
 
 ### Install runtime and development dependencies
 
-This is the best setup for local development because it installs `pytest` and `ruff` too.
+This installs test and lint tooling too.
 
 ```powershell
 uv sync --extra dev
@@ -105,57 +98,6 @@ Or with Python directly:
 python -m eu_weather_mcp
 ```
 
-## Run the Streamlit UI
-
-Use this command:
-
-```powershell
-uv run streamlit run src/eu_weather_mcp/streamlit_app.py
-```
-
-Or after activating the environment:
-
-```powershell
-streamlit run src/eu_weather_mcp/streamlit_app.py
-```
-
-Then open the local URL shown by Streamlit, usually:
-
-```text
-http://localhost:8501
-```
-
-## Important UI Note
-
-The Streamlit page does not automatically fetch weather data on load.
-
-You need to:
-
-1. Enter a location like `Berlin`
-2. Choose `hourly` or `daily`
-3. Click `Get forecast` or `Get alerts`
-
-If you open the page and do not click a button yet, the app only shows the input controls and a small info message. That is expected with the current UI.
-
-## Run Tests
-
-Install dev dependencies first if needed:
-
-```powershell
-uv sync --extra dev
-```
-
-Then run:
-
-```powershell
-uv run pytest
-```
-
-## Lint the Code
-
-```powershell
-uv run ruff check .
-```
 
 ## Install with Requirements Files
 
@@ -205,6 +147,14 @@ docker build -t ghcr.io/your-github-user/eu-weather-mcp:latest .
 docker push ghcr.io/your-github-user/eu-weather-mcp:latest
 ```
 
+## Open Source
+
+- License: MIT
+- Contributions are welcome
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) before sending changes
+- Follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Report vulnerabilities according to [SECURITY.md](SECURITY.md)
+
 ## MCP Examples
 
 Initialize:
@@ -230,17 +180,3 @@ Get alerts:
 ```json
 {"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"get_weather_alerts","arguments":{"location":"48.8566,2.3522"}}}
 ```
-
-## Current Limitations
-
-- The app is Europe-only by design
-- The MCP server is stdio-first
-- SSE transport is not implemented yet
-- There is no persistent storage
-- The Streamlit UI is a simple local interface, not a production frontend
-
-## Notes
-
-- Logs go to `stderr` so MCP responses on `stdout` stay clean
-- `uv.lock` is included for reproducible installs
-- Weather data depends on the availability of Open-Meteo
